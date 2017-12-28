@@ -54,7 +54,7 @@ def setup_app(*args, **kwargs):
         hooks.PolicyHook(),  # priority 140
     ]
 
-    app = pecan.make_app(
+    app = pecan.make_app(  # creating the Pecan application object, Eli
         pecan_config.app.root,
         debug=False,
         wrap_app=_wrap_app,

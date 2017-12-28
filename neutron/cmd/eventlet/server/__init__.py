@@ -23,10 +23,10 @@ def main():
 
 
 def _main_neutron_server():
-    if cfg.CONF.web_framework == 'legacy':
+    if cfg.CONF.web_framework == 'legacy':  # 从默认使用pecan
         wsgi_eventlet.eventlet_wsgi_server()
     else:
-        wsgi_pecan.pecan_wsgi_server()
+        wsgi_pecan.pecan_wsgi_server()  # 默认走pecan
 
 
 def main_rpc_eventlet():

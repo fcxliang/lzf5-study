@@ -33,7 +33,6 @@ class F5LBaaSV2Driver(driver_base.LoadBalancerBaseDriver):
     def __init__(self, plugin, env='Project'):
         super(F5LBaaSV2Driver, self).__init__(plugin)
 
-        # 赋值各种manager
         self.load_balancer = LoadBalancerManager(self)
         self.listener = ListenerManager(self)
         self.pool = PoolManager(self)
@@ -154,7 +153,7 @@ class L7PolicyManager(driver_base.BaseL7PolicyManager):
     def delete(self, context, l7policy):
         self.driver.f5.l7policy.delete(context, l7policy)
 
-# test
+
 class L7RuleManager(driver_base.BaseL7RuleManager):
 
     def create(self, context, l7rule):

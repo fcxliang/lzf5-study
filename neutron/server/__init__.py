@@ -34,7 +34,7 @@ def boot_server(server_func):
                    " search paths (~/.neutron/, ~/, /etc/neutron/, /etc/) and"
                    " the '--config-file' option!"))
     try:
-        server_func()
+        server_func()  # _main_neutron_server
     except KeyboardInterrupt:
         pass
     except RuntimeError as e:
