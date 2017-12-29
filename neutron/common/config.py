@@ -121,8 +121,8 @@ def load_paste_app(app_name):
 
     :param app_name: Name of the application to load
     """
-    loader = wsgi.Loader(cfg.CONF)
-    app = loader.load_app(app_name)
+    loader = wsgi.Loader(cfg.CONF)  # 从配置文件neutron.conf中加载page deploy配置文件的位置，得到loader
+    app = loader.load_app(app_name)  # 通过deploy.loadapp加载app
     return app
 
 

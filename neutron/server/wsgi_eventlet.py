@@ -22,7 +22,7 @@ LOG = log.getLogger(__name__)
 
 
 def eventlet_wsgi_server():
-    neutron_api = service.serve_wsgi(service.NeutronApiService)
+    neutron_api = service.serve_wsgi(service.NeutronApiService)  # 调用NeutronApiService的create和start
     start_api_and_rpc_workers(neutron_api)
 
 

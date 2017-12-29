@@ -22,7 +22,10 @@ from neutron import wsgi
 
 
 class Versions(object):
-
+    """
+     create and  return the follow string:
+    {"versions": [{"status": "CURRENT", "id": "v2.0", "links": [{"href": "http://controller:9696/v2.0", "rel": "self"}]}]}
+    """
     @classmethod
     def factory(cls, global_config, **local_config):
         return cls(app=None)
@@ -54,7 +57,7 @@ class Versions(object):
         body = (wsgi.Serializer(metadata=metadata).
                 serialize(response, content_type))
 
-        response = webob.Response()
+        response = webob.Response()  # 通过webob建立response对象
         response.content_type = content_type
         response.body = wsgi.encode_body(body)
 

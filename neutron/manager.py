@@ -120,9 +120,9 @@ class NeutronManager(object):
         #                breaks tach monitoring. It has been removed
         #                intentionally to allow v2 plugins to be monitored
         #                for performance metrics.
-        plugin_provider = cfg.CONF.core_plugin
+        plugin_provider = cfg.CONF.core_plugin   # 就是我们配置的ml2
         LOG.info(_LI("Loading core plugin: %s"), plugin_provider)
-        self.plugin = self._get_plugin_instance(CORE_PLUGINS_NAMESPACE,
+        self.plugin = self._get_plugin_instance(CORE_PLUGINS_NAMESPACE,  # setup.cfg中neutron.core_plugins=ml2 ...
                                                 plugin_provider)
         msg = validate_post_plugin_load()
         if msg:

@@ -65,11 +65,12 @@ class NeutronKeystoneContext(base.ConfigurableMiddleware):
 
 def pipeline_factory(loader, global_conf, **local_conf):
     """Create a paste pipeline based on the 'auth_strategy' config option."""
+    # neutron config中的auth_strategy， 从paste配置中看有两个选择：keystone，noauth，默认keystone
     pipeline = local_conf[cfg.CONF.auth_strategy]
-    pipeline = pipeline.split()
-    filters = [loader.get_filter(n) for n in pipeline[:-1]]
-    app = loader.get_app(pipeline[-1])
-    filters.reverse()
-    for filter in filters:
+    pipeline = pipeline.split()  # 转成列表  filter  filter 。。。 app
+    filters = [loader.get_filter(n) for n in pipeline[:-1]]  # 取出filter列表
+    app = loader.get_app(pipeline[-1])  #  取出app
+    filters.reverse()  # filter倒序
+    for filter in filters:  #开始执行filter和app
         app = filter(app)
     return app

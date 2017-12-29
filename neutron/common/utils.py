@@ -445,7 +445,7 @@ def load_class_by_alias_or_classname(namespace, name):
         raise ImportError(_("Class not found."))
     try:
         # Try to resolve class by alias
-        mgr = driver.DriverManager(namespace, name)
+        mgr = driver.DriverManager(namespace, name)  # 加载驱动 ml2
         class_to_load = mgr.driver
     except RuntimeError:
         e1_info = sys.exc_info()

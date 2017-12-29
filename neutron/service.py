@@ -55,7 +55,7 @@ class WsgiService(object):
 
     """
 
-    def __init__(self, app_name):
+    def __init__(self, app_name):  # app_name --> neutron
         self.app_name = app_name
         self.wsgi_app = None
 
@@ -75,8 +75,8 @@ class NeutronApiService(WsgiService):
     @classmethod
     def create(cls, app_name='neutron'):
         # Setup logging early
-        config.setup_logging()
-        service = cls(app_name)
+        config.setup_logging()  # 日志
+        service = cls(app_name)  # 创建本类的对象，跳入父类WsgiService
         return service
 
 
@@ -279,18 +279,18 @@ def start_plugins_workers():
 
 
 def _get_api_workers():
-    workers = cfg.CONF.api_workers
+    workers = cfg.CONF.api_workers  # API worker进程数量，默认等于cpu数量
     if workers is None:
         workers = processutils.get_worker_count()
     return workers
 
 
 def _run_wsgi(app_name):
-    app = config.load_paste_app(app_name)
+    app = config.load_paste_app(app_name)   # 加载paste  包括了/和/v2 ，v返回版本信息  v2下是主要的api
     if not app:
         LOG.error(_LE('No known API applications configured.'))
         return
-    return run_wsgi_app(app)
+    return run_wsgi_app(app)  # 启动server
 
 
 def run_wsgi_app(app):

@@ -73,7 +73,7 @@ class APIRouter(base_wsgi.Router):
 
     def __init__(self, **local_config):
         mapper = routes_mapper.Mapper()
-        plugin = manager.NeutronManager.get_plugin()
+        plugin = manager.NeutronManager.get_plugin()  # 加载核心插件ml2plugin
         ext_mgr = extensions.PluginAwareExtensionManager.get_instance()
         ext_mgr.extend_resources("2.0", attributes.RESOURCE_ATTRIBUTE_MAP)
 
