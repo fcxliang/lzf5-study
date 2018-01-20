@@ -164,7 +164,11 @@ class LoadBalancer(model_base.BASEV2, model_base.HasId, model_base.HasProject):
 
 class PoolV2(model_base.BASEV2, model_base.HasId, model_base.HasProject):
     """Represents a v2 neutron load balancer pool."""
-
+    """
+        name, description, loadbalancer_id, healthmonitor_id, protocol, lb_algorithm,
+        admin_state_up, provisioning_status, operating_status
+        jion: members healthmonitor loadbalancer
+    """
     NAME = 'pool'
 
     __tablename__ = "lbaas_pools"

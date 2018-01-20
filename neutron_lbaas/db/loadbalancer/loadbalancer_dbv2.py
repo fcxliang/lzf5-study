@@ -526,7 +526,7 @@ class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
                         tls_containers_changed=False):
         self._convert_api_to_db(listener)
         with context.session.begin(subtransactions=True):
-            listener_db = self._get_resource(context, models.Listener, id)
+            listener_db = self._get_resource(context, models.Listener, id)  # 从数据库取db
 
             if not listener.get('protocol'):
                 # User did not intend to change the protocol so we will just
@@ -599,14 +599,14 @@ class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
 
     def create_pool(self, context, pool):
         with context.session.begin(subtransactions=True):
-            self._load_id(context, pool)
-            pool['provisioning_status'] = constants.PENDING_CREATE
-            pool['operating_status'] = lb_const.OFFLINE
+            self._load_id(context, pool)  # 产生一个pool的uuid
+            pool['provisioning_status'] = constants.PENDING_CREATE  # 创建状态：等待创建
+            pool['operating_status'] = lb_const.OFFLINE  # 操作状态：离线
 
-            session_info = pool.pop('session_persistence', None)
+            session_info = pool.pop('session_persistence', None)  # 取出session持久化信息
             pool_db = models.PoolV2(**pool)
 
-            if session_info:
+            if session_info:  # 创建session持久化数据库项
                 s_p = self._create_session_persistence_db(session_info,
                                                           pool_db.id)
                 pool_db.session_persistence = s_p
@@ -675,7 +675,7 @@ class LoadBalancerPluginDbv2(base_db.CommonDbMixin,
 
     def get_pool(self, context, id):
         pool_db = self._get_resource(context, models.PoolV2, id)
-        return data_models.Pool.from_sqlalchemy_model(pool_db)
+        return data_models.Pool.from_sqlalchemy_model(pool_db)  # 返回service model实例
 
     def create_pool_member(self, context, member, pool_id):
         try:

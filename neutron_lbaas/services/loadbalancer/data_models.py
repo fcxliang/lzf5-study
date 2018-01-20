@@ -44,17 +44,17 @@ class BaseDataModel(object):
 
     def to_dict(self, **kwargs):
         ret = {}
-        for attr in self.__dict__:
-            if attr.startswith('_') or not kwargs.get(attr, True):
+        for attr in self.__dict__:  # 遍历所有的字段
+            if attr.startswith('_') or not kwargs.get(attr, True):  # 越过内部的,和参数中没有要求的
                 continue
-            value = self.__dict__[attr]
-            if isinstance(getattr(self, attr), list):
-                ret[attr] = []
-                for item in value:
-                    if isinstance(item, BaseDataModel):
-                        ret[attr].append(item.to_dict())
+            value = self.__dict__[attr]  # 取出attr的值
+            if isinstance(getattr(self, attr), list):  # 这个属性是不是list
+                ret[attr] = []  # 是list，初始化一个list
+                for item in value:  # 遍历list的值
+                    if isinstance(item, BaseDataModel):  # 每个值是不是又是个BaseDataModel
+                        ret[attr].append(item.to_dict())   # 是的话继续to_dict递归
                     else:
-                        ret[attr] = item
+                        ret[attr] = item  # 不是，最终只能留下最后一个
             elif isinstance(getattr(self, attr), BaseDataModel):
                 ret[attr] = value.to_dict()
             elif six.PY2 and isinstance(value, six.text_type):
@@ -74,48 +74,50 @@ class BaseDataModel(object):
 
     @classmethod
     def from_sqlalchemy_model(cls, sa_model, calling_classes=None):
+        #  sa_model 数据库字段
         calling_classes = calling_classes or []
         attr_mapping = vars(cls).get("attr_mapping")
         instance = cls()
         for attr_name in cls.fields:
             if attr_name.startswith('_'):
                 continue
-            if attr_mapping and attr_name in attr_mapping.keys():
-                attr = getattr(sa_model, attr_mapping[attr_name])
-            elif hasattr(sa_model, attr_name):
+            if attr_mapping and attr_name in attr_mapping.keys():  # 优先从attr_mapping里找，
+                attr = getattr(sa_model, attr_mapping[attr_name])  # 这里面可能是一个属性的其他名字，向前兼容??
+            elif hasattr(sa_model, attr_name):  # 从数据库字段中找
                 attr = getattr(sa_model, attr_name)
             else:
                 continue
+            # 到这里有值的属性继续
             # Handles M:1 or 1:1 relationships
             if isinstance(attr, model_base.BASEV2):
                 if hasattr(instance, attr_name):
-                    data_class = SA_MODEL_TO_DATA_MODEL_MAP[attr.__class__]
+                    data_class = SA_MODEL_TO_DATA_MODEL_MAP[attr.__class__]  # 看一下属性是不是我们自己的类型
                     # Don't recurse down object classes too far. If we have
                     # seen the same object class more than twice, we are
                     # probably in a loop.
-                    if data_class and calling_classes.count(data_class) < 2:
-                        setattr(instance, attr_name,
+                    if data_class and calling_classes.count(data_class) < 2:  # 是自己的类型，递归获取
+                        setattr(instance, attr_name,                     # calling_classes.count防止引用自己导致死循环
                                 data_class.from_sqlalchemy_model(
                                     attr,
                                     calling_classes=calling_classes + [cls]))
             # Handles 1:M or N:M relationships
-            elif (isinstance(attr, collections.InstrumentedList) or
+            elif (isinstance(attr, collections.InstrumentedList) or   # 是一个列表
                  isinstance(attr, orderinglist.OrderingList)):
                 for item in attr:
-                    if hasattr(instance, attr_name):
+                    if hasattr(instance, attr_name):  # instance有没有这个属性
                         data_class = SA_MODEL_TO_DATA_MODEL_MAP[item.__class__]
                         # Don't recurse down object classes too far. If we have
                         # seen the same object class more than twice, we are
                         # probably in a loop.
                         if (data_class and
-                            calling_classes.count(data_class) < 2):
+                                calling_classes.count(data_class) < 2):
                             attr_list = getattr(instance, attr_name) or []
                             attr_list.append(data_class.from_sqlalchemy_model(
                                 item, calling_classes=calling_classes + [cls]))
                             setattr(instance, attr_name, attr_list)
             # This isn't a relationship so it must be a "primitive"
             else:
-                setattr(instance, attr_name, attr)
+                setattr(instance, attr_name, attr)  # 从sa_models中取出属性设置在instance上
         return instance
 
     @property

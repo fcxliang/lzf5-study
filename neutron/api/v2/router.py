@@ -48,6 +48,52 @@ class Index(wsgi.Application):
 
     @webob.dec.wsgify(RequestClass=wsgi.Request)
     def __call__(self, req):
+        """
+{
+    "resources": [
+        {
+            "links": [
+                {
+                    "href": "http://controller:9696/v2.0/subnets",
+                    "rel": "self"
+                }
+            ],
+            "name": "subnet",
+            "collection": "subnets"
+        },
+        {
+            "links": [
+                {
+                    "href": "http://controller:9696/v2.0/subnetpools",
+                    "rel": "self"
+                }
+            ],
+            "name": "subnetpool",
+            "collection": "subnetpools"
+        },
+        {
+            "links": [
+                {
+                    "href": "http://controller:9696/v2.0/networks",
+                    "rel": "self"
+                }
+            ],
+            "name": "network",
+            "collection": "networks"
+        },
+        {
+            "links": [
+                {
+                    "href": "http://controller:9696/v2.0/ports",
+                    "rel": "self"
+                }
+            ],
+            "name": "port",
+            "collection": "ports"
+        }
+    ]
+}
+        """
         metadata = {}
 
         layout = []
@@ -74,13 +120,14 @@ class APIRouter(base_wsgi.Router):
     def __init__(self, **local_config):
         mapper = routes_mapper.Mapper()
         plugin = manager.NeutronManager.get_plugin()  # 加载核心插件ml2plugin
-        ext_mgr = extensions.PluginAwareExtensionManager.get_instance()
+        ext_mgr = extensions.PluginAwareExtensionManager.get_instance()  # 把所有的插件的扩展都load进来（实例化），map
         ext_mgr.extend_resources("2.0", attributes.RESOURCE_ATTRIBUTE_MAP)
 
         col_kwargs = dict(collection_actions=COLLECTION_ACTIONS,
                           member_actions=MEMBER_ACTIONS)
 
         def _map_resource(collection, resource, params, parent=None):
+            #              networks    network   allow...
             allow_bulk = cfg.CONF.allow_bulk
             allow_pagination = cfg.CONF.allow_pagination
             allow_sorting = cfg.CONF.allow_sorting
@@ -97,11 +144,14 @@ class APIRouter(base_wsgi.Router):
                                  requirements=REQUIREMENTS,
                                  path_prefix=path_prefix,
                                  **col_kwargs)
-            return mapper.collection(collection, resource,
+            return mapper.collection(collection, resource,   #  networks, network  **kwargs
                                      **mapper_kwargs)
 
         mapper.connect('index', '/', controller=Index(RESOURCES))
-        for resource in RESOURCES:
+        for resource in RESOURCES:  # 只是RESOURCE里的
+            # collection=RESOURCES[resource]  例如：networks
+            # resource=resource  例如：network
+            # params=attributes.RESOURCE_ATTRIBUTE_MAP.get(RESOURCES[resource], dict())
             _map_resource(RESOURCES[resource], resource,
                           attributes.RESOURCE_ATTRIBUTE_MAP.get(
                               RESOURCES[resource], dict()))

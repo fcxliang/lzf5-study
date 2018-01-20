@@ -48,7 +48,7 @@ class TypeManager(stevedore.named.NamedExtensionManager):
         self.drivers = {}
 
         LOG.info(_LI("Configured type driver names: %s"),
-                 cfg.CONF.ml2.type_drivers)
+                 cfg.CONF.ml2.type_drivers) # flat , vlan
         super(TypeManager, self).__init__('neutron.ml2.type_drivers',
                                           cfg.CONF.ml2.type_drivers,
                                           invoke_on_load=True)
@@ -880,7 +880,7 @@ class ExtensionManager(stevedore.named.NamedExtensionManager):
         # the order in which the drivers are called.
         self.ordered_ext_drivers = []
 
-        LOG.info(_LI("Configured extension driver names: %s"),
+        LOG.info(_LI("Configured extension driver names: %s"),  # port_security
                  cfg.CONF.ml2.extension_drivers)
         super(ExtensionManager, self).__init__('neutron.ml2.extension_drivers',
                                                cfg.CONF.ml2.extension_drivers,

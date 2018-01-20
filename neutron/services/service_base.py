@@ -52,7 +52,7 @@ class ServicePluginBase(extensions.PluginInterface,
 def load_drivers(service_type, plugin):
     """Loads drivers for specific service.
 
-    Passes plugin instance to driver's constructor
+    Passes plugin instance to driver's   constructor
     """
     service_type_manager = sdb.ServiceTypeManager.get_instance()
     providers = (service_type_manager.

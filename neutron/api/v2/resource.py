@@ -38,6 +38,7 @@ def Resource(controller, faults=None, deserializers=None, serializers=None,
              action_status=None):
     """Represents an API entity resource and the associated serialization and
     deserialization logic
+    表示一个API实体资源和相关的序列化和反序列化逻辑
     """
     default_deserializers = {'application/json': wsgi.JSONDeserializer()}
     default_serializers = {'application/json': wsgi.JSONDictSerializer()}
@@ -52,7 +53,7 @@ def Resource(controller, faults=None, deserializers=None, serializers=None,
     faults = faults or {}
 
     @webob.dec.wsgify(RequestClass=Request)
-    def resource(request):
+    def resource(request):  # 所有请求的处理
         route_args = request.environ.get('wsgiorg.routing_args')
         if route_args:
             args = route_args[1].copy()
@@ -63,7 +64,7 @@ def Resource(controller, faults=None, deserializers=None, serializers=None,
         #                it from the args if it is in the matchdict
         args.pop('controller', None)
         fmt = args.pop('format', None)
-        action = args.pop('action', None)
+        action = args.pop('action', None)  # 取出action
         content_type = format_types.get(fmt,
                                         request.best_match_content_type())
         language = request.best_match_language()
@@ -71,7 +72,7 @@ def Resource(controller, faults=None, deserializers=None, serializers=None,
         serializer = serializers.get(content_type)
 
         try:
-            if request.body:
+            if request.body:  # 取body并解码
                 args['body'] = deserializer.deserialize(request.body)['body']
 
             # Routes library is dumb and cuts off everything after last dot (.)
@@ -90,7 +91,7 @@ def Resource(controller, faults=None, deserializers=None, serializers=None,
                 args['id'] = '.'.join([args['id'], fmt])
 
             method = getattr(controller, action)
-            result = method(request=request, **args)
+            result = method(request=request, **args)  # 执行action
         except Exception as e:
             mapped_exc = api_common.convert_exception_to_http_exc(e, faults,
                                                                   language)
@@ -108,12 +109,12 @@ def Resource(controller, faults=None, deserializers=None, serializers=None,
             raise mapped_exc
 
         status = action_status.get(action, 200)
-        body = serializer.serialize(result)
+        body = serializer.serialize(result)  # json转码
         # NOTE(jkoelker) Comply with RFC2616 section 9.7
         if status == 204:
             content_type = ''
             body = None
-
+        # 响应
         return webob.Response(request=request, status=status,
                               content_type=content_type,
                               body=body)

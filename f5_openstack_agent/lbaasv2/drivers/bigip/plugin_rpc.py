@@ -43,7 +43,7 @@ class LBaaSv2PluginRPC(object):
 
         self.target = messaging.Target(topic=self.topic,
                                        version=constants.RPC_API_VERSION)
-        self._client = rpc.get_client(self.target, version_cap=None)
+        self._client = rpc.get_client(self.target, version_cap=None)  # RPC client
 
         self.context = context
         self.env = env

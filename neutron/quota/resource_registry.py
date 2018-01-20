@@ -27,7 +27,7 @@ def register_resource(resource):
     ResourceRegistry.get_instance().register_resource(resource)
 
 
-def register_resource_by_name(resource_name, plural_name=None):
+def register_resource_by_name(resource_name, plural_name=None):  # 例如resource_name为network
     ResourceRegistry.get_instance().register_resource_by_name(
         resource_name, plural_name)
 
@@ -167,6 +167,11 @@ class ResourceRegistry(object):
         If QUOTAS.track_quota_usage is True, and there is a model mapping for
         the current resource, this function will return an instance of
         AccountedResource; otherwise an instance of CountableResource.
+
+        # 配额资源工厂
+        # 此例程根据系统配置返回适当类型的资源实例
+        # 如果QUOTAS.track_quota_usage为真,并且存在当前资源的模型映射，这个函数将返回一个AccountedResource的实例
+        # 否则返回一个CountableResource的实例
         """
 
         if (not cfg.CONF.QUOTAS.track_quota_usage or
@@ -231,11 +236,11 @@ class ResourceRegistry(object):
         for res in resources:
             self.register_resource(res)
 
-    def register_resource_by_name(self, resource_name,
+    def register_resource_by_name(self, resource_name,  # 例如resource_name为network
                                   plural_name=None):
         """Register a resource by name."""
         resource = self._create_resource_instance(
-            resource_name, plural_name)
+            resource_name, plural_name)  # CountableResource 或者是TrackedResource
         self.register_resource(resource)
 
     def unregister_resources(self):

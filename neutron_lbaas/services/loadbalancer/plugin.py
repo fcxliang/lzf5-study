@@ -50,7 +50,7 @@ CERT_MANAGER_PLUGIN = neutron_lbaas.common.cert_manager.get_backend()
 
 def add_provider_configuration(type_manager, service_type):
     type_manager.add_provider_configuration(
-        service_type,
+        service_type,   # LOADBALANCERV2
         pconf.ProviderConfiguration('neutron_lbaas'))
 
 
@@ -78,7 +78,7 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
         """Initialization for the loadbalancer service plugin."""
         self.db = ldbv2.LoadBalancerPluginDbv2()
         self.service_type_manager = st_db.ServiceTypeManager.get_instance()
-        add_provider_configuration(
+        add_provider_configuration(   # 加载provider
             self.service_type_manager, constants.LOADBALANCERV2)
         self._load_drivers()
         self.start_rpc_listeners()
@@ -635,28 +635,28 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
         return [listener.to_api_dict() for listener in self.db.get_listeners(
             context, filters=filters)]
 
-    def create_pool(self, context, pool):
+    def create_pool(self, context, pool):  # 创建pool
         pool = pool.get('pool')
-        listener_id = pool.get('listener_id')
-        listeners = pool.get('listeners', [])
+        listener_id = pool.get('listener_id')  # 获取listener_id
+        listeners = pool.get('listeners', [])  # 多个监听器??
         if listener_id:
             listeners.append(listener_id)
-        lb_id = pool.get('loadbalancer_id')
+        lb_id = pool.get('loadbalancer_id')  #
         db_listeners = []
         for l in listeners:
-            db_l = self.db.get_listener(context, l)
+            db_l = self.db.get_listener(context, l)  # 通过listener_id在数据库检索出listener配置信息
             db_listeners.append(db_l)
             # Take the pool's loadbalancer_id from the first listener found
             # if it wasn't specified in the API call.
-            if not lb_id:
+            if not lb_id:  # 如果没有传入lb_id的话，则从listener的信息中取
                 lb_id = db_l.loadbalancer.id
             # All specified listeners must be on the same loadbalancer
-            if db_l.loadbalancer.id != lb_id:
+            if db_l.loadbalancer.id != lb_id:  # 校验，如果传入的lb_id与监听器的不符，出错
                 raise sharedpools.ListenerAndPoolMustBeOnSameLoadbalancer()
-            if db_l.default_pool_id:
+            if db_l.default_pool_id:  # 如果监听器已经有了默认pool
                 raise sharedpools.ListenerDefaultPoolAlreadySet(
                     listener_id=db_l.id, pool_id=db_l.default_pool_id)
-        if not lb_id:
+        if not lb_id:  # 没有lb_id是不对的，所以：在openstack里，pool依赖于监听器(lb->listener->pool)
             raise sharedpools.PoolMustHaveLoadbalancer()
         pool['loadbalancer_id'] = lb_id
         self._validate_session_persistence_info(
@@ -665,11 +665,11 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
         # blank out the listeners at this point.
         del pool['listener_id']
         pool['listeners'] = []
-        db_pool = self.db.create_pool(context, pool)
+        db_pool = self.db.create_pool(context, pool)  # 创建pool的数据库项
         self.db.test_and_set_status(context, models.LoadBalancer,
                                     db_pool.loadbalancer_id,
                                     constants.PENDING_UPDATE)
-        for db_l in db_listeners:
+        for db_l in db_listeners:  # 改变 listener的default_pool_id
             try:
                 self.db.update_listener(context, db_l.id,
                                         {'default_pool_id': db_pool.id})
@@ -679,7 +679,7 @@ class LoadBalancerPluginv2(loadbalancerv2.LoadBalancerPluginBaseV2):
                 raise exc
         # Reload the pool from the DB to re-populate pool.listeners
         # before calling the driver
-        db_pool = self.db.get_pool(context, db_pool.id)
+        db_pool = self.db.get_pool(context, db_pool.id)  # 再次从数据库取一遍pool信息
         driver = self._get_driver_for_loadbalancer(
             context, db_pool.loadbalancer_id)
         self._call_driver_operation(context, driver.pool.create, db_pool)

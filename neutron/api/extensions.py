@@ -443,7 +443,7 @@ class ExtensionManager(object):
         LOG.info(_LI('Initializing extension manager.'))
         self.path = path
         self.extensions = {}
-        self._load_all_extensions()
+        self._load_all_extensions()  # 加载插件的所有扩展
 
     def get_resources(self):
         """Returns a list of ResourceExtension objects."""
@@ -623,7 +623,7 @@ class PluginAwareExtensionManager(ExtensionManager):
 
     _instance = None
 
-    def __init__(self, path, plugins):
+    def __init__(self, path, plugins):  # path:扩展的存放路径，一般在plugins下的一个extentions目录
         self.plugins = plugins
         super(PluginAwareExtensionManager, self).__init__(path)
         self.check_if_plugin_extensions_loaded()
@@ -666,7 +666,7 @@ class PluginAwareExtensionManager(ExtensionManager):
     def get_instance(cls):
         if cls._instance is None:
             service_plugins = manager.NeutronManager.get_service_plugins()
-            cls._instance = cls(get_extensions_path(service_plugins),
+            cls._instance = cls(get_extensions_path(service_plugins),  # 获得扩展的路径
                                 service_plugins)
         return cls._instance
 
@@ -759,12 +759,12 @@ class ResourceExtension(object):
 def get_extensions_path(service_plugins=None):
     paths = collections.OrderedDict()
 
-    # Add Neutron core extensions
+    # Add Neutron core extensions # 类似于一个bitmap
     paths[neutron.extensions.__path__[0]] = 1
     if service_plugins:
         # Add Neutron *-aas extensions
         for plugin in service_plugins.values():
-            neutron_mod = provider_configuration.NeutronModule(
+            neutron_mod = provider_configuration.NeutronModule(  # 如neutron_lbaas
                 plugin.__module__.split('.')[0])
             try:
                 paths[neutron_mod.module().extensions.__path__[0]] = 1

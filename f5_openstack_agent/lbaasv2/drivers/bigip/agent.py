@@ -45,7 +45,7 @@ import f5_openstack_agent.lbaasv2.drivers.bigip.constants_v2 as f5constants
 
 LOG = oslo_logging.getLogger(__name__)
 
-OPTS = [
+OPTS = [  # 配置参数
     cfg.IntOpt(
         'periodic_interval',
         default=10,
@@ -70,20 +70,20 @@ class F5AgentService(n_rpc.Service):
 
 def main():
     """F5 LBaaS agent for OpenStack."""
-    cfg.CONF.register_opts(OPTS)
-    cfg.CONF.register_opts(manager.OPTS)
-    cfg.CONF.register_opts(interface.OPTS)
+    cfg.CONF.register_opts(OPTS)  # 注册上面的OPT periodic_interval
+    cfg.CONF.register_opts(manager.OPTS)  # 注册agentmanager的OPTS
+    cfg.CONF.register_opts(interface.OPTS)  # 注册interface的OPTS
 
-    config.register_agent_state_opts_helper(cfg.CONF)
+    config.register_agent_state_opts_helper(cfg.CONF)  # 注册配置
     config.register_root_helper(cfg.CONF)
 
     common_config.init(sys.argv[1:])
     # alias for common_config.setup_logging()...
     config.setup_logging()
 
-    mgr = manager.LbaasAgentManager(cfg.CONF)
+    mgr = manager.LbaasAgentManager(cfg.CONF) # RPC初始化在这里
 
-    svc = F5AgentService(
+    svc = F5AgentService(   # Message server。agent功能endpoints
         host=mgr.agent_host,
         topic=f5constants.TOPIC_LOADBALANCER_AGENT_V2,
         manager=mgr

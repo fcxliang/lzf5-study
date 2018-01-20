@@ -52,7 +52,7 @@ class F5LBaaSV2Driver(driver_base.LoadBalancerBaseDriver):
         LOG.debug("F5LBaaSV2Driver: initializing, version=%s, impl=%s, env=%s"
                   % (VERSION, f5lbaasdriver.__version__, env))
 
-        self.f5 = F5DriverV2(plugin, env)
+        self.f5 = F5DriverV2(plugin, env)  # f5驱动
 
 
 class F5LBaaSV2DriverTest(F5LBaaSV2Driver):

@@ -82,6 +82,7 @@ def safe_creation(context, create_fn, delete_fn, create_bindings,
 def model_query_scope(context, model):
     # Unless a context has 'admin' or 'advanced-service' rights the
     # query will be scoped to a single tenant_id
+    # 除非context里面有admin或者advanced-service权限，否则查询权限会被限制在单一租户id内部
     return ((not context.is_admin and hasattr(model, 'tenant_id')) and
             (not context.is_advsvc and hasattr(model, 'tenant_id')))
 
@@ -147,15 +148,15 @@ class CommonDbMixin(object):
         """
         return weakref.proxy(self)
 
-    def model_query_scope(self, context, model):
+    def model_query_scope(self, context, model):  # 判断是否是普通租户权限
         return model_query_scope(context, model)
 
     def _model_query(self, context, model):
         query = context.session.query(model)
         # define basic filter condition for model query
         query_filter = None
-        if self.model_query_scope(context, model):
-            if hasattr(model, 'rbac_entries'):
+        if self.model_query_scope(context, model):  # ★这个权限范围判断很重要 ★
+            if hasattr(model, 'rbac_entries'):  # model有没有rbac_entries这个属性
                 query = query.outerjoin(model.rbac_entries)
                 rbac_model = model.rbac_entries.property.mapper.class_
                 query_filter = (
@@ -163,13 +164,13 @@ class CommonDbMixin(object):
                     ((rbac_model.action == 'access_as_shared') &
                      ((rbac_model.target_tenant == context.tenant_id) |
                       (rbac_model.target_tenant == '*'))))
-            elif hasattr(model, 'shared'):
-                query_filter = ((model.tenant_id == context.tenant_id) |
+            elif hasattr(model, 'shared'):  # 有没有shared这个属性
+                query_filter = ((model.tenant_id == context.tenant_id) |  # 条件就是：同租户或者shared为true
                                 (model.shared == sql.true()))
             else:
-                query_filter = (model.tenant_id == context.tenant_id)
+                query_filter = (model.tenant_id == context.tenant_id)  # 条件为：同租户
         # Execute query hooks registered from mixins and plugins
-        for _name, hooks in six.iteritems(self._model_query_hooks.get(model,
+        for _name, hooks in six.iteritems(self._model_query_hooks.get(model,  # model专属的过滤钩子
                                                                       {})):
             query_hook = hooks.get('query')
             if isinstance(query_hook, six.string_types):
@@ -186,7 +187,7 @@ class CommonDbMixin(object):
         # NOTE(salvatore-orlando): 'if query_filter' will try to evaluate the
         # condition, raising an exception
         if query_filter is not None:
-            query = query.filter(query_filter)
+            query = query.filter(query_filter)  # 没有这个query_filter的话就加进去
         return query
 
     def _fields(self, resource, fields):
@@ -197,7 +198,7 @@ class CommonDbMixin(object):
 
     def _get_by_id(self, context, model, id):
         query = self._model_query(context, model)
-        return query.filter(model.id == id).one()
+        return query.filter(model.id == id).one()  # 再加一个model.id=id的filter
 
     def _apply_filters_to_query(self, query, model, filters, context=None):
         if filters:

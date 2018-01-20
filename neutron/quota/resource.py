@@ -92,6 +92,11 @@ class BaseResource(object):
                   does not track usage.
         """
 
+# 可数资源是直接对应于数据库中的对象的那些资源，即网络，子网等。
+# 一个CountableResource必须用一个计数函数来构造，这个计数函数将被调用以确定资源的当前计数
+# 计数函数将传递给上下文，以及传递给Quota.count（）的额外位置和关键字参数。
+# 它应该返回一个指定计数的整数。
+
 
 class CountableResource(BaseResource):
     """Describe a resource where the counts are determined by a function."""
@@ -127,7 +132,7 @@ class CountableResource(BaseResource):
 
         super(CountableResource, self).__init__(
             name, flag=flag, plural_name=plural_name)
-        self._count_func = count
+        self._count_func = count  # 返回资源计数的函数
 
     def count(self, context, plugin, tenant_id, **kwargs):
         return self._count_func(context, plugin, self.plural_name, tenant_id)

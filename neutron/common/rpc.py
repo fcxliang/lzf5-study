@@ -279,7 +279,8 @@ class Service(service.Service):
         if manager is None:
             self.manager = self
         else:
-            self.manager = manager
+            pass
+        self.manager = manager
 
     def start(self):
         super(Service, self).start()

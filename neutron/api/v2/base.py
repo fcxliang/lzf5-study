@@ -99,9 +99,9 @@ class Controller(object):
         if member_actions is None:
             member_actions = []
         self._plugin = plugin
-        self._collection = collection.replace('-', '_')
-        self._resource = resource.replace('-', '_')
-        self._attr_info = attr_info
+        self._collection = collection.replace('-', '_')  # networks
+        self._resource = resource.replace('-', '_')  # network
+        self._attr_info = attr_info  # allow ...
         self._allow_bulk = allow_bulk
         self._allow_pagination = allow_pagination
         self._allow_sorting = allow_sorting
@@ -130,12 +130,16 @@ class Controller(object):
             self._parent_id_name = None
             parent_part = ''
         self._plugin_handlers = {
-            self.LIST: 'get%s_%s' % (parent_part, self._collection),
-            self.SHOW: 'get%s_%s' % (parent_part, self._resource)
+            self.LIST: 'get%s_%s' % (parent_part, self._collection),  # get_networks  list操作
+            self.SHOW: 'get%s_%s' % (parent_part, self._resource)  # get_network   show操作
         }
         for action in [self.CREATE, self.UPDATE, self.DELETE]:
+            # create: create_network
+            # update: update_network
+            # delete: delete_network
             self._plugin_handlers[action] = '%s%s_%s' % (action, parent_part,
                                                          self._resource)
+            # _plugin_handlers就是action 的map
 
     def _get_primary_key(self, default_primary_key='id'):
         for key, value in six.iteritems(self._attr_info):
@@ -750,5 +754,5 @@ def create_resource(collection, resource, plugin, params, allow_bulk=False,
                             member_actions=member_actions, parent=parent,
                             allow_pagination=allow_pagination,
                             allow_sorting=allow_sorting)
-
+    # 返回resource函数对象
     return wsgi_resource.Resource(controller, FAULT_MAP)

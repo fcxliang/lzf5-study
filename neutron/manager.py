@@ -102,6 +102,9 @@ class NeutronManager(object):
     instantiating the correct plugin that concretely implements
     neutron_plugin_base class.
     The caller should make sure that NeutronManager is a singleton.
+
+    用于解析配置文件，初始化正确实现了neutron_plugin_base类的插件，调用者应该
+    保证调用者是单例的
     """
     _instance = None
     __trace_args__ = {"name": "rpc"}
@@ -122,7 +125,7 @@ class NeutronManager(object):
         #                for performance metrics.
         plugin_provider = cfg.CONF.core_plugin   # 就是我们配置的ml2
         LOG.info(_LI("Loading core plugin: %s"), plugin_provider)
-        self.plugin = self._get_plugin_instance(CORE_PLUGINS_NAMESPACE,  # setup.cfg中neutron.core_plugins=ml2 ...
+        self.plugin = self._get_plugin_instance(CORE_PLUGINS_NAMESPACE,  # setup.cfg中neutron.core_plugins=ml2=...
                                                 plugin_provider)
         msg = validate_post_plugin_load()
         if msg:
@@ -134,7 +137,7 @@ class NeutronManager(object):
         # TODO(enikanorov): make core plugin the same as
         # the rest of service plugins
         self.service_plugins = {constants.CORE: self.plugin}
-        self._load_service_plugins()
+        self._load_service_plugins()  # 加载服务插件，比如lbaasv2
         # Used by pecan WSGI
         self.resource_plugin_mappings = {}
         self.resource_controller_mappings = {}
@@ -155,7 +158,7 @@ class NeutronManager(object):
         except ImportError:
             raise ImportError(_("Plugin '%s' not found.") % plugin_provider)
 
-    def _get_plugin_instance(self, namespace, plugin_provider):
+    def _get_plugin_instance(self, namespace, plugin_provider):  # /provider为ml2
         plugin_class = self.load_class_for_provider(namespace, plugin_provider)
         return plugin_class()
 
@@ -176,7 +179,7 @@ class NeutronManager(object):
         """Get default service plugins to be loaded."""
         return constants.DEFAULT_SERVICE_PLUGINS.keys()
 
-    def _load_service_plugins(self):
+    def _load_service_plugins(self):  # 把所有的插件都放入service_plugins
         """Loads service plugins.
 
         Starts from the core plugin and checks if it supports
@@ -185,8 +188,8 @@ class NeutronManager(object):
         # load services from the core plugin first
         self._load_services_from_core_plugin()
 
-        plugin_providers = cfg.CONF.service_plugins
-        plugin_providers.extend(self._get_default_service_plugins())
+        plugin_providers = cfg.CONF.service_plugins  # LoadBalancerPluginv2
+        plugin_providers.extend(self._get_default_service_plugins())  # 再加上default_service_plugins
         LOG.debug("Loading service plugins: %s", plugin_providers)
         for provider in plugin_providers:
             if provider == '':
@@ -194,7 +197,7 @@ class NeutronManager(object):
 
             LOG.info(_LI("Loading Plugin: %s"), provider)
             plugin_inst = self._get_plugin_instance('neutron.service_plugins',
-                                                    provider)
+                                                    provider)  # 例如：provider: LoadBalancerPluginv2
 
             # only one implementation of svc_type allowed
             # specifying more than one plugin

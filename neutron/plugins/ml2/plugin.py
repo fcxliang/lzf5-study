@@ -113,6 +113,9 @@ class Ml2Plugin(db_base_plugin_v2.NeutronDbPluginV2,
     drivers loaded via Python entry points. Networks can be made up of
     multiple segments (not yet fully implemented).
     """
+    # Ml2Plugin是一个Neutron插件，它基于可单独扩展的网络类型集合以及连接到这些类型网络的机制
+    # 网络类型和机制被实现为通过Python入口点加载的驱动程序
+    # 网络可以由多个部分组成
 
     # This attribute specifies whether the plugin supports or not
     # bulk/pagination/sorting operations. Name mangling is used in
@@ -153,13 +156,13 @@ class Ml2Plugin(db_base_plugin_v2.NeutronDbPluginV2,
         security_group_rule=sg_models.SecurityGroupRule)
     def __init__(self):
         # First load drivers, then initialize DB, then initialize drivers
-        self.type_manager = managers.TypeManager()
-        self.extension_manager = managers.ExtensionManager()
-        self.mechanism_manager = managers.MechanismManager()
+        self.type_manager = managers.TypeManager()  # vlan flat等
+        self.extension_manager = managers.ExtensionManager()  # port_sectory  qos等
+        self.mechanism_manager = managers.MechanismManager()  # linuxbridge  openvswitch
         super(Ml2Plugin, self).__init__()
-        self.type_manager.initialize()
-        self.extension_manager.initialize()
-        self.mechanism_manager.initialize()
+        self.type_manager.initialize()  # 初始化类型驱动
+        self.extension_manager.initialize()  # 初始化扩展
+        self.mechanism_manager.initialize()  # 初始化机制驱动
         registry.subscribe(self._port_provisioned, resources.PORT,
                            provisioning_blocks.PROVISIONING_COMPLETE)
         registry.subscribe(self._handle_segment_change, resources.SEGMENT,
