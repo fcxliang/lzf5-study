@@ -665,8 +665,13 @@ class PluginAwareExtensionManager(ExtensionManager):
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
+<<<<<<< HEAD
             service_plugins = manager.NeutronManager.get_service_plugins()
             cls._instance = cls(get_extensions_path(service_plugins),  # 获得扩展的路径
+=======
+            service_plugins = manager.NeutronManager.get_service_plugins()  # 现在也只有ml2
+            cls._instance = cls(get_extensions_path(service_plugins),
+>>>>>>> 846a16256c2e76e1e47f19876862961457593247
                                 service_plugins)
         return cls._instance
 

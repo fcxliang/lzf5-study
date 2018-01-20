@@ -120,7 +120,11 @@ class APIRouter(base_wsgi.Router):
     def __init__(self, **local_config):
         mapper = routes_mapper.Mapper()
         plugin = manager.NeutronManager.get_plugin()  # 加载核心插件ml2plugin
+<<<<<<< HEAD
         ext_mgr = extensions.PluginAwareExtensionManager.get_instance()  # 把所有的插件的扩展都load进来（实例化），map
+=======
+        ext_mgr = extensions.PluginAwareExtensionManager.get_instance()  # 加载扩展
+>>>>>>> 846a16256c2e76e1e47f19876862961457593247
         ext_mgr.extend_resources("2.0", attributes.RESOURCE_ATTRIBUTE_MAP)
 
         col_kwargs = dict(collection_actions=COLLECTION_ACTIONS,
