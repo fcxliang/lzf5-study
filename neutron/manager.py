@@ -218,7 +218,7 @@ class NeutronManager(object):
         # load services from the core plugin first
         self._load_services_from_core_plugin()  # 首先从core plugin加载服务
 
-        plugin_providers = cfg.CONF.service_plugins  # LoadBalancerPluginv2
+        plugin_providers = cfg.CONF.service_plugins  # 我们的配置是LoadBalancerPluginv2
         plugin_providers.extend(self._get_default_service_plugins())  # 再加上default_service_plugins
         LOG.debug("Loading service plugins: %s", plugin_providers)
         for provider in plugin_providers:

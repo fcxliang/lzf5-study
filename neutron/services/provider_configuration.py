@@ -105,6 +105,10 @@ class NeutronModule(object):
         # --config-dir, the option is merged from all the definitions
         # made across all the imported config files
         try:
+            """
+            [service_providers]
+service_provider = LOADBALANCERV2:F5Networks:neutron_lbaas.drivers.f5.driver_v2.F5LBaaSV2Driver:default
+           """
             providers = cfg.CONF.service_providers.service_provider
         except cfg.NoSuchOptError:
             pass
@@ -214,7 +218,7 @@ class ServiceProviderAlreadyAssociated(n_exc.Conflict):
 
 class ProviderConfiguration(object):
 
-    def __init__(self, svc_module='neutron'):
+    def __init__(self, svc_module='neutron'):  # neutron-lbaas
         self.providers = {}
         for prov in parse_service_provider_opt(svc_module):
             self.add_provider(prov)
