@@ -125,13 +125,10 @@ class NeutronManager(object):
         #                for performance metrics.
         plugin_provider = cfg.CONF.core_plugin   # 就是我们配置的ml2
         LOG.info(_LI("Loading core plugin: %s"), plugin_provider)
-<<<<<<< HEAD
-        self.plugin = self._get_plugin_instance(CORE_PLUGINS_NAMESPACE,  # setup.cfg中neutron.core_plugins=ml2=...
-                                                plugin_provider)
-=======
+
         self.plugin = self._get_plugin_instance(CORE_PLUGINS_NAMESPACE,  # setup.cfg中neutron.core_plugins=ml2 ...
                                                 plugin_provider)   # neutron.core_plugins    ml2。返回驱动
->>>>>>> 846a16256c2e76e1e47f19876862961457593247
+
         msg = validate_post_plugin_load()
         if msg:
             LOG.critical(msg)
@@ -141,13 +138,9 @@ class NeutronManager(object):
         # checking extensions
         # TODO(enikanorov): make core plugin the same as
         # the rest of service plugins
-<<<<<<< HEAD
         self.service_plugins = {constants.CORE: self.plugin}
         self._load_service_plugins()  # 加载服务插件，比如lbaasv2
-=======
-        self.service_plugins = {constants.CORE: self.plugin}  # CORE ==> ml2
-        self._load_service_plugins()
->>>>>>> 846a16256c2e76e1e47f19876862961457593247
+
         # Used by pecan WSGI
         self.resource_plugin_mappings = {}
         self.resource_controller_mappings = {}
@@ -168,13 +161,9 @@ class NeutronManager(object):
         except ImportError:
             raise ImportError(_("Plugin '%s' not found.") % plugin_provider)
 
-<<<<<<< HEAD
-    def _get_plugin_instance(self, namespace, plugin_provider):  # /provider为ml2
-        plugin_class = self.load_class_for_provider(namespace, plugin_provider)
-=======
+
     def _get_plugin_instance(self, namespace, plugin_provider):
         plugin_class = self.load_class_for_provider(namespace, plugin_provider)  # neutron.core_plugins    ml2
->>>>>>> 846a16256c2e76e1e47f19876862961457593247
         return plugin_class()
 
     def _load_services_from_core_plugin(self):
